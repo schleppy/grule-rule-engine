@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	mux "github.com/hyperjumptech/hyper-mux"
+	"github.com/schelppy/grule-rule-engine/logger"
+	mux "github.com/schelppy/hyper-mux"
 )
 
 var (

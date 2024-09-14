@@ -1,4 +1,4 @@
-//  Copyright hyperjumptech/grule-rule-engine Authors
+//  Copyright schelppy/grule-rule-engine Authors
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/engine"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/schelppy/grule-rule-engine/ast"
+	"github.com/schelppy/grule-rule-engine/builder"
+	"github.com/schelppy/grule-rule-engine/engine"
+	"github.com/schelppy/grule-rule-engine/logger"
+	"github.com/schelppy/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
 )
 

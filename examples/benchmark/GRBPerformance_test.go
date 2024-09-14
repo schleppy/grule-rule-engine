@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/schelppy/grule-rule-engine/ast"
+	"github.com/schelppy/grule-rule-engine/builder"
+	"github.com/schelppy/grule-rule-engine/logger"
+	"github.com/schelppy/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
 )
 

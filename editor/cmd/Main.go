@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hyperjumptech/grule-rule-engine/editor"
+	"github.com/schelppy/grule-rule-engine/editor"
 )
 
 func main() {
