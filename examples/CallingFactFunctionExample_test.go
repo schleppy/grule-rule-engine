@@ -16,12 +16,14 @@ package examples
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -83,15 +85,17 @@ func TestCallingFactFunction(t *testing.T) {
 	err := dataContext.Add("Clapper", c)
 	assert.NoError(t, err)
 
+	logs := logger.NewDefaultLogger()
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 	err = ruleBuilder.BuildRuleFromResource("CallingFactFunction", "0.1.1", pkg.NewBytesResource([]byte(CallFactFuncGRL)))
 	assert.NoError(t, err)
 
 	knowledgeBase, err := lib.NewKnowledgeBaseInstance("CallingFactFunction", "0.1.1")
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 500}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 500
 	err = eng1.Execute(dataContext, knowledgeBase)
 	assert.NoError(t, err)
 	fmt.Printf("%v", c)

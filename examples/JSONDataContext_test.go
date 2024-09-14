@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type ObjectResult struct {
@@ -60,11 +62,13 @@ rule CheckIfJSONIntWorks {
 }`
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("TestJSONSimple", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestJSONSimple", "0.0.1")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)
@@ -80,11 +84,13 @@ rule CheckIfJSONStringWorks {
 }`
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("TestJSONSimple", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestJSONSimple", "0.0.1")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)
@@ -100,11 +106,13 @@ rule CheckIfJSONArrayWorks {
 }`
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("TestJSONSimple", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestJSONSimple", "0.0.1")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)
@@ -120,11 +128,13 @@ rule CheckIfJSONMapWorks {
 }`
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("TestJSONSimple", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestJSONSimple", "0.0.1")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)
@@ -164,11 +174,13 @@ rule CheckIfJSONIntWorks {
 }`
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("TestJSONBitComplex", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestJSONBitComplex", "0.0.1")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)

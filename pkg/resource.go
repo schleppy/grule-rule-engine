@@ -83,9 +83,10 @@ func NewFileResource(path string) Resource {
 // For example, if the base path is "/some/base/path"
 // The pattern to accept all GRL file is "/some/base/path/**/*.grl".
 // This will accept all *.grl files under /some/base/path and its directories.
-func NewFileResourceBundle(basePath string, pathPattern ...string) *FileResourceBundle {
+func NewFileResourceBundle(logger logger.Logger, basePath string, pathPattern ...string) *FileResourceBundle {
 
 	return &FileResourceBundle{
+		logger:      logger,
 		BasePath:    basePath,
 		PathPattern: pathPattern,
 	}
@@ -95,6 +96,7 @@ func NewFileResourceBundle(basePath string, pathPattern ...string) *FileResource
 // the root location of the file and the file pattern to look for.
 // It will look into sub-directories for the file with pattern matching.
 type FileResourceBundle struct {
+	logger logger.Logger
 	// The base path where all the
 	BasePath string
 	// List Glob like file pattern.
@@ -122,7 +124,7 @@ func (bundle *FileResourceBundle) MustLoad() []Resource {
 }
 
 func (bundle *FileResourceBundle) loadPath(path string) ([]Resource, error) {
-	logger.Log.Tracef("Enter directory %s", path)
+	bundle.logger.Tracef("Enter directory %s", path)
 
 	finfos, err := ioutil.ReadDir(path)
 
@@ -147,7 +149,7 @@ func (bundle *FileResourceBundle) loadPath(path string) ([]Resource, error) {
 					return nil, err
 				}
 				if matched {
-					logger.Log.Debugf("Loading file %s", fulPath)
+					bundle.logger.Debugf("Loading file %s", fulPath)
 					bytes, err := ioutil.ReadFile(fulPath)
 					if err != nil {
 						return nil, err
@@ -293,15 +295,16 @@ func (res *URLResource) Load() ([]byte, error) {
 // NewGITResourceBundle will create a new instance of GITResourceBundle
 // url is the GIT http/https url.
 // pathPattern are list of file pattern (glob) to filter files located in the repository
-func NewGITResourceBundle(url string, pathPattern ...string) *GITResourceBundle {
+func NewGITResourceBundle(logger logger.Logger, url string, pathPattern ...string) *GITResourceBundle {
 	return &GITResourceBundle{
+		logger:      logger,
 		URL:         url,
 		PathPattern: pathPattern,
 	}
 }
 
-func NewGITResourceBundleWithAuth(url string, user string, password string, pathPattern ...string) *GITResourceBundle {
-	resource := NewGITResourceBundle(url, pathPattern...)
+func NewGITResourceBundleWithAuth(logger logger.Logger, url string, user string, password string, pathPattern ...string) *GITResourceBundle {
+	resource := NewGITResourceBundle(logger, url, pathPattern...)
 	resource.User = user
 	resource.Password = password
 
@@ -312,6 +315,7 @@ func NewGITResourceBundleWithAuth(url string, user string, password string, path
 // the necessary information needed to communicate to the GIT server.
 // It will look into sub-directories, in the git, for the file with pattern matching.
 type GITResourceBundle struct {
+	logger logger.Logger
 	// GIT Repository HTTPS URL
 	URL string
 	// The Ref name to checkout, if you dont know, let it empty
@@ -327,7 +331,7 @@ type GITResourceBundle struct {
 }
 
 func (bundle *GITResourceBundle) loadPath(url, path string, fileSyst billy.Filesystem) ([]Resource, error) {
-	logger.Log.Tracef("Enter directory %s", path)
+	bundle.logger.Tracef("Enter directory %s", path)
 	finfos, err := fileSyst.ReadDir(path)
 	if err != nil {
 
@@ -354,7 +358,7 @@ func (bundle *GITResourceBundle) loadPath(url, path string, fileSyst billy.Files
 					return nil, err
 				}
 				if matched {
-					logger.Log.Debugf("Loading git file %s", fulPath)
+					bundle.logger.Debugf("Loading git file %s", fulPath)
 					f, err := fileSyst.Open(fulPath)
 					if err != nil {
 

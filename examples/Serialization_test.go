@@ -16,18 +16,21 @@ package examples
 
 import (
 	"bytes"
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast"
+	"github.com/hyperjumptech/grule-rule-engine/builder"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSerialization(t *testing.T) {
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("Purchase Calculator", "0.0.1", pkg.NewFileResource("CashFlowRule.grl"))
 	assert.NoError(t, err)
 
@@ -55,8 +58,9 @@ func TestSerializationOnFile(t *testing.T) {
 
 	// SAFING INTO FILE
 	// First prepare our library for loading the orignal GRL
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("Purchase Calculator", "0.0.1", pkg.NewFileResource("CashFlowRule.grl"))
 	assert.NoError(t, err)
 
@@ -71,7 +75,7 @@ func TestSerializationOnFile(t *testing.T) {
 
 	// LOADING FROM FILE
 	// Lets assume we are using different library, so create a new one
-	lib2 := ast.NewKnowledgeLibrary()
+	lib2 := ast.NewKnowledgeLibrary(logs)
 
 	// Open the existing safe file
 	f2, err := os.Open(testFile)

@@ -17,15 +17,18 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"reflect"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 // NewFunctionCall creates new instance of FunctionCall
-func NewFunctionCall() *FunctionCall {
+func NewFunctionCall(logger logger.Logger) *FunctionCall {
 
 	return &FunctionCall{
+		logger:       logger,
 		AstID:        unique.NewID(),
 		ArgumentList: NewArgumentList(),
 	}
@@ -33,6 +36,7 @@ func NewFunctionCall() *FunctionCall {
 
 // FunctionCall AST graph node
 type FunctionCall struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -62,6 +66,7 @@ func (e *FunctionCall) MakeCatalog(cat *Catalog) {
 // Clone will clone this FunctionCall. The new clone will have an identical structure
 func (e *FunctionCall) Clone(cloneTable *pkg.CloneTable) *FunctionCall {
 	clone := &FunctionCall{
+		logger:       e.logger,
 		AstID:        unique.NewID(),
 		GrlText:      e.GrlText,
 		FunctionName: e.FunctionName,
@@ -119,7 +124,7 @@ func (e *FunctionCall) SetGrlText(grlText string) {
 
 // AcceptArgumentList will accept an ArgumentList AST graph into this ast graph
 func (e *FunctionCall) AcceptArgumentList(argList *ArgumentList) error {
-	AstLog.Tracef("Method received argument list")
+	e.logger.Tracef("Method received argument list")
 	e.ArgumentList = argList
 
 	return nil
@@ -133,7 +138,7 @@ func (e *FunctionCall) EvaluateArgumentList(dataContext IDataContext, memory *Wo
 		return nil, err
 	}
 	if dataContext == nil {
-		AstLog.Errorf("Datacontext for function call %s (%s) is nil", e.FunctionName, e.AstID)
+		e.logger.Errorf("Datacontext for function call %s (%s) is nil", e.FunctionName, e.AstID)
 	}
 
 	return args, nil

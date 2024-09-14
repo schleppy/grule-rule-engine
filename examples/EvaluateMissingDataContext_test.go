@@ -2,8 +2,10 @@ package examples
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
@@ -30,9 +32,10 @@ func TestDataContextMissingFact(t *testing.T) {
 		Result: "NoResult",
 	}
 
-	// build rules
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	// buil
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("Test", "0.0.1", pkg.NewBytesResource([]byte(inputRule)))
 
 	// 	add JSON fact
@@ -48,6 +51,6 @@ func TestDataContextMissingFact(t *testing.T) {
 	}
 
 	// results in panic
-	engine.NewGruleEngine().Execute(dcx, kb)
+	engine.NewGruleEngine(logs).Execute(dcx, kb)
 
 }

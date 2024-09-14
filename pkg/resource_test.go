@@ -20,6 +20,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 )
 
 const (
@@ -35,10 +37,11 @@ func TestFileResourceBundle_Load(t *testing.T) {
 	t.Logf("OS is : %s", runtime.GOOS)
 	t.Logf("Path : %s", path)
 	var frb *FileResourceBundle
+	logs := logger.NewDefaultLogger()
 	if runtime.GOOS == "windows" {
-		frb = NewFileResourceBundle(path, "**\\*.grl")
+		frb = NewFileResourceBundle(logs, path, "**\\*.grl")
 	} else {
-		frb = NewFileResourceBundle(path, "/**/*.grl")
+		frb = NewFileResourceBundle(logs, path, "/**/*.grl")
 	}
 	resources := frb.MustLoad()
 	if len(resources) != 6 {
@@ -106,7 +109,8 @@ func TestGitResource(t *testing.T) {
 		t.Skip("skipping GIT resource test in short mode")
 	}
 	gitRb := &GITResourceBundle{
-		URL: "https://github.com/hyperjumptech/grule-rule-engine.git",
+		logger: logger.NewDefaultLogger(),
+		URL:    "https://github.com/hyperjumptech/grule-rule-engine.git",
 		PathPattern: []string{
 			"/antlr/*.grl",
 		},

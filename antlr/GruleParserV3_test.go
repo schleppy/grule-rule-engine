@@ -23,6 +23,7 @@ import (
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	parser "github.com/hyperjumptech/grule-rule-engine/antlr/parser/grulev3"
 	"github.com/hyperjumptech/grule-rule-engine/ast"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
 )
@@ -128,7 +129,6 @@ func TestV3Lexer(t *testing.T) {
 }
 
 func TestV3Parser(t *testing.T) {
-	// logrus.SetLevel(logrus.TraceLevel)
 	data, err := ioutil.ReadFile("./sample4.grl")
 	if err != nil {
 		t.Fatal(err)
@@ -143,9 +143,10 @@ func TestV3Parser(t *testing.T) {
 			Errors: make([]error, 0),
 		}
 
-		kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+		logs := logger.NewDefaultLogger()
+		kb := ast.NewKnowledgeLibrary(logs).GetKnowledgeBase("T", "1")
 
-		listener := NewGruleV3ParserListener(kb, errReporter)
+		listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 		psr := parser.Newgrulev3Parser(stream)
 		psr.BuildParseTrees = true
@@ -159,8 +160,6 @@ func TestV3Parser(t *testing.T) {
 }
 
 func TestV3Parser2(t *testing.T) {
-	// logrus.SetLevel(logrus.InfoLevel)
-
 	sdata := rules
 
 	is := antlr.NewInputStream(sdata)
@@ -170,9 +169,9 @@ func TestV3Parser2(t *testing.T) {
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+	kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-	listener := NewGruleV3ParserListener(kb, errReporter)
+	listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true
@@ -185,8 +184,6 @@ func TestV3Parser2(t *testing.T) {
 }
 
 func TestV3ParserEscapedStringInvalid(t *testing.T) {
-	// logrus.SetLevel(logrus.DebugLevel)
-
 	is := antlr.NewInputStream(invalidEscapeRule)
 	lexer := parser.Newgrulev3Lexer(is)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
@@ -194,9 +191,9 @@ func TestV3ParserEscapedStringInvalid(t *testing.T) {
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+	kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-	listener := NewGruleV3ParserListener(kb, errReporter)
+	listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true
@@ -208,8 +205,6 @@ func TestV3ParserEscapedStringInvalid(t *testing.T) {
 }
 
 func TestV3ParserEscapedStringValid(t *testing.T) {
-	// logrus.SetLevel(logrus.DebugLevel)
-
 	is := antlr.NewInputStream(validEscapeRule)
 	lexer := parser.Newgrulev3Lexer(is)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
@@ -217,9 +212,9 @@ func TestV3ParserEscapedStringValid(t *testing.T) {
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+	kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-	listener := NewGruleV3ParserListener(kb, errReporter)
+	listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true
@@ -231,8 +226,6 @@ func TestV3ParserEscapedStringValid(t *testing.T) {
 }
 
 func TestV3ParserSnapshotEyeBalling(t *testing.T) {
-	// logrus.SetLevel(logrus.TraceLevel)
-
 	data := `
 rule SpeedUp "When testcar is speeding up we keep increase the speed." salience 10 {
     when
@@ -250,9 +243,9 @@ rule SpeedUp "When testcar is speeding up we keep increase the speed." salience 
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+	kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-	listener := NewGruleV3ParserListener(kb, errReporter)
+	listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true
@@ -292,9 +285,9 @@ func prepareV3TestKnowledgeBase(t *testing.T, grl string) (*ast.KnowledgeBase, *
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+	kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-	listener := NewGruleV3ParserListener(kb, errReporter)
+	listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true
@@ -309,7 +302,6 @@ func prepareV3TestKnowledgeBase(t *testing.T, grl string) (*ast.KnowledgeBase, *
 }
 
 func TestV3ConstantFunctionAndConstantFunctionChain(t *testing.T) {
-	// logrus.SetLevel(logrus.InfoLevel)
 	dctx := ast.NewDataContext()
 
 	data := `
@@ -344,7 +336,6 @@ rule RuleOne "RuleOneDesc" salience 123 {
 }
 
 func TestV3RuleRetract(t *testing.T) {
-	// logrus.SetLevel(logrus.InfoLevel)
 	dctx := ast.NewDataContext()
 
 	data := `
@@ -381,7 +372,6 @@ rule RuleOne "RuleOneDesc" salience 123 {
 }
 
 func TestV3RuleAssignment(t *testing.T) {
-	// logrus.SetLevel(logrus.TraceLevel)
 	dctx := ast.NewDataContext()
 
 	data := `
@@ -529,9 +519,9 @@ func TestV3ParserGarbageInput(t *testing.T) {
 		errReporter := &pkg.GruleErrorReporter{
 			Errors: make([]error, 0),
 		}
-		kb := ast.NewKnowledgeLibrary().GetKnowledgeBase("T", "1")
+		kb := ast.NewKnowledgeLibrary(logger.NewDefaultLogger()).GetKnowledgeBase("T", "1")
 
-		listener := NewGruleV3ParserListener(kb, errReporter)
+		listener := NewGruleV3ParserListener(logger.NewDefaultLogger(), kb, errReporter)
 
 		psr := parser.Newgrulev3Parser(stream)
 		psr.BuildParseTrees = true

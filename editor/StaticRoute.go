@@ -2,12 +2,12 @@ package editor
 
 import (
 	"embed"
-	"github.com/hyperjumptech/grule-rule-engine/editor/mime"
-	mux "github.com/hyperjumptech/hyper-mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/hyperjumptech/grule-rule-engine/editor/mime"
+	mux "github.com/hyperjumptech/hyper-mux"
 )
 
 //go:embed statics
@@ -29,7 +29,6 @@ func IsDir(path string) bool {
 }
 
 func GetPathTree(path string) []string {
-	logrus.Debugf("Into %s", path)
 	var entries []os.DirEntry
 	var err error
 	if strings.HasPrefix(path, "./") {
@@ -41,7 +40,6 @@ func GetPathTree(path string) []string {
 	if err != nil {
 		return ret
 	}
-	logrus.Debugf("Path %s %d etries", path, len(entries))
 	for _, e := range entries {
 		if e.IsDir() {
 			ret = append(ret, "[DIR]"+path+"/"+e.Name())

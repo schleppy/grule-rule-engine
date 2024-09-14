@@ -16,13 +16,15 @@ package examples
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 type MyḞact struct {
@@ -51,8 +53,9 @@ func TestUnicodeTutorial(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Prepare knowledgebase library and load it with our rule.
-	knowledgeLibrary := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(knowledgeLibrary)
+	logs := logger.NewDefaultLogger()
+	knowledgeLibrary := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, knowledgeLibrary)
 
 	drls := `
 rule ChĕckValuĕs "Check the default values" salience 10 {
@@ -70,7 +73,7 @@ rule ChĕckValuĕs "Check the default values" salience 10 {
 	knowledgeBase, err := knowledgeLibrary.NewKnowledgeBaseInstance("Tutorial", "0.0.1")
 	assert.NoError(t, err)
 
-	engine := engine.NewGruleEngine()
+	engine := engine.NewGruleEngine(logs)
 	err = engine.Execute(dataCtx, knowledgeBase)
 	assert.NoError(t, err)
 	assert.Equal(t, "Let say \"HellǑ Grule\"", myFact.WhatToSay)

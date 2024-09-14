@@ -16,11 +16,13 @@ package benchmark
 
 import (
 	"fmt"
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"io/ioutil"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast"
+	"github.com/hyperjumptech/grule-rule-engine/builder"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 /*
@@ -67,8 +69,9 @@ func load100RulesIntoKnowledgeBase() {
 	dctx := ast.NewDataContext()
 	_ = dctx.Add("Fact", fact)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	_ = rb.BuildRuleFromResource("load_rules_test", "0.1.1", pkg.NewBytesResource([]byte(rules)))
 	_, _ = lib.NewKnowledgeBaseInstance("load_rules_test", "0.1.1")
 }
@@ -83,8 +86,9 @@ func load1000RulesIntoKnowledgeBase() {
 	dctx := ast.NewDataContext()
 	_ = dctx.Add("Fact", fact)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	_ = rb.BuildRuleFromResource("load_rules_test", "0.1.1", pkg.NewBytesResource([]byte(rules)))
 	_, _ = lib.NewKnowledgeBaseInstance("load_rules_test", "0.1.1")
 }

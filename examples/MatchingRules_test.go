@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type Fact struct {
@@ -83,15 +85,16 @@ func TestGruleEngine_FetchMatchingRules_Having_Diff_Salience(t *testing.T) {
 	dctx := ast.NewDataContext()
 	err := dctx.Add("Fact", fact)
 	assert.NoError(t, err)
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("conflict_rules_test", "0.1.1", pkg.NewBytesResource([]byte(duplicateRulesWithDiffSalience)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("conflict_rules_test", "0.1.1")
 	assert.NoError(t, err)
 
 	//When
-	e := engine.NewGruleEngine()
+	e := engine.NewGruleEngine(logs)
 	ruleEntries, err := e.FetchMatchingRules(dctx, kb)
 	assert.NoError(t, err)
 

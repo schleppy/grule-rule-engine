@@ -17,8 +17,10 @@ package ast
 import (
 	"bytes"
 	"errors"
-	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
 	"reflect"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
@@ -33,6 +35,7 @@ func NewWhenScope() *WhenScope {
 
 // WhenScope AST graph node
 type WhenScope struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -64,6 +67,7 @@ type WhenScopeReceiver interface {
 // Clone will clone this Clone. The new clone will have an identical structure
 func (e *WhenScope) Clone(cloneTable *pkg.CloneTable) *WhenScope {
 	clone := &WhenScope{
+		logger:  e.logger,
 		AstID:   unique.NewID(),
 		GrlText: e.GrlText,
 	}

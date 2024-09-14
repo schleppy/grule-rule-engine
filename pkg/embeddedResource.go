@@ -65,6 +65,7 @@ func (res *EmbeddedResource) String() string {
 // all at once by specifying the root location of the file and the file pattern
 // to look for. It will look into sub-directories for the file with pattern matching.
 type EmbeddedResourceBundle struct {
+	logger logger.Logger
 	// The base path for the embedded resources
 	BasePath string
 	// List Glob like file pattern.
@@ -83,11 +84,12 @@ type EmbeddedResourceBundle struct {
 // For example, if the base path is "/some/base/path"
 // The pattern to accept all GRL file is "/some/base/path/**/*.grl".
 // This will accept all *.grl files under /some/base/path and its directories.
-func NewEmbeddedResourceBundle(source embed.FS, basePath string, pathPattern ...string) *EmbeddedResourceBundle {
+func NewEmbeddedResourceBundle(logger logger.Logger, source embed.FS, basePath string, pathPattern ...string) *EmbeddedResourceBundle {
 
 	if runtime.GOOS == "windows" {
 
 		return &EmbeddedResourceBundle{
+			logger:      logger,
 			Source:      source,
 			BasePath:    strings.TrimLeft(basePath, "\\"),
 			PathPattern: pathPattern,
@@ -95,6 +97,7 @@ func NewEmbeddedResourceBundle(source embed.FS, basePath string, pathPattern ...
 	}
 
 	return &EmbeddedResourceBundle{
+		logger:      logger,
 		Source:      source,
 		BasePath:    strings.TrimLeft(basePath, "/"),
 		PathPattern: pathPattern,
@@ -119,7 +122,7 @@ func (bundle *EmbeddedResourceBundle) MustLoad() []Resource {
 }
 
 func (bundle *EmbeddedResourceBundle) loadPath(path string) ([]Resource, error) {
-	logger.Log.Tracef("Enter embedded directory %s", path)
+	bundle.logger.Tracef("Enter embedded directory %s", path)
 
 	finfos, err := bundle.Source.ReadDir(path)
 	if err != nil {
@@ -153,7 +156,7 @@ func (bundle *EmbeddedResourceBundle) loadPath(path string) ([]Resource, error) 
 					return nil, err
 				}
 				if matched {
-					logger.Log.Debugf("Loading embedded file %s", fulPath)
+					bundle.logger.Debugf("Loading embedded file %s", fulPath)
 					gress := NewEmbeddedResource(bundle.Source, fulPath)
 					_, err := gress.Load()
 					if err != nil {

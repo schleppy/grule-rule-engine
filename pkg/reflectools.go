@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-
-	"github.com/hyperjumptech/grule-rule-engine/logger"
 )
 
 // GetFunctionList get list of functions in a struct instance
@@ -196,8 +194,6 @@ func ValueToInterface(valueToConvert reflect.Value) interface{} {
 
 			return valueToConvert.Interface()
 		}
-		logger.Log.Errorf("Can't interface value of struct %v", valueToConvert)
-
 		return nil
 	default:
 

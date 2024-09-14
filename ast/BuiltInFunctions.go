@@ -15,24 +15,13 @@
 package ast
 
 import (
-	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"math"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
-)
-
-var (
-	// grlLoggerFields default fields for grule
-	grlLoggerFields = logger.Fields{
-		"package": "AST",
-		"source":  "GRL",
-	}
-
-	// GrlLogger is the logger that be used from within the rule engine GRL
-	GrlLogger = logger.Log.WithFields(grlLoggerFields)
 )
 
 // BuiltInFunctions struct hosts the built-in functions ready to invoke from the rule engine execution.
@@ -77,7 +66,7 @@ func (gf *BuiltInFunctions) Now() time.Time {
 
 // Log extension to log.Print
 func (gf *BuiltInFunctions) Log(text string) {
-	GrlLogger.Println(text)
+	logger.NewDefaultLogger().Println(text)
 }
 
 // StringContains extension to strings.Contains
@@ -88,7 +77,7 @@ func (gf *BuiltInFunctions) StringContains(str, substr string) bool {
 
 // LogFormat extension to log.Printf
 func (gf *BuiltInFunctions) LogFormat(format string, i interface{}) {
-	GrlLogger.Printf(format, i)
+	logger.NewDefaultLogger().Printf(format, i)
 }
 
 // IsNil Enables nill checking on variables.

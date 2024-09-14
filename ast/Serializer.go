@@ -18,11 +18,12 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
-	"github.com/sirupsen/logrus"
 	"io"
 	"math"
 	"reflect"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 )
 
 // NodeType is to label a Meta information within catalog
@@ -86,6 +87,7 @@ const (
 // some how a bit expensive due to string parsing and pattern operation
 // by ANTLR4
 type Catalog struct {
+	logger                          logger.Logger
 	KnowledgeBaseName               string
 	KnowledgeBaseVersion            string
 	Data                            map[string]Meta
@@ -98,11 +100,18 @@ type Catalog struct {
 	MemoryExpressionAtomVariableMap map[string][]string
 }
 
+func NewCatalog(logger logger.Logger) *Catalog {
+	return &Catalog{
+		logger: logger,
+	}
+}
+
 // BuildKnowledgeBase will rebuild a knowledgebase from this Catalog.
 // the rebuilt KnowledgeBase is identical to the original KnowledgeBase from
 // which this Catalog was built.
 func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 	workingMem := &WorkingMemory{
+		logger:                    cat.logger,
 		Name:                      cat.MemoryName,
 		Version:                   cat.MemoryVersion,
 		expressionSnapshotMap:     make(map[string]*Expression),
@@ -113,6 +122,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		ID:                        unique.NewID(),
 	}
 	knowledgeBase := &KnowledgeBase{
+		logger:        cat.logger,
 		Name:          cat.KnowledgeBaseName,
 		Version:       cat.KnowledgeBaseVersion,
 		DataContext:   nil,
@@ -156,6 +166,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeExpression:
 			amet := meta.(*ExpressionMeta)
 			expression := &Expression{
+				logger:           cat.logger,
 				AstID:            amet.AstID,
 				GrlText:          amet.GrlText,
 				LeftExpression:   nil,
@@ -203,6 +214,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeExpressionAtom:
 			amet := meta.(*ExpressionAtomMeta)
 			expressionAtm := &ExpressionAtom{
+				logger:           cat.logger,
 				AstID:            amet.AstID,
 				GrlText:          amet.GrlText,
 				VariableName:     amet.VariableName,
@@ -217,6 +229,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeFunctionCall:
 			amet := meta.(*FunctionCallMeta)
 			funcCall := &FunctionCall{
+				logger:       cat.logger,
 				AstID:        amet.AstID,
 				GrlText:      amet.GrlText,
 				FunctionName: amet.FunctionName,
@@ -226,6 +239,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeRuleEntry:
 			amet := meta.(*RuleEntryMeta)
 			ruleEntry := &RuleEntry{
+				logger:          cat.logger,
 				AstID:           amet.AstID,
 				GrlText:         amet.GrlText,
 				RuleName:        amet.RuleName,
@@ -239,6 +253,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeThenExpression:
 			amet := meta.(*ThenExpressionMeta)
 			thenExp := &ThenExpression{
+				logger:         cat.logger,
 				AstID:          amet.AstID,
 				GrlText:        amet.GrlText,
 				Assignment:     nil,
@@ -256,6 +271,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeThenScope:
 			amet := meta.(*ThenScopeMeta)
 			n := &ThenScope{
+				logger:             cat.logger,
 				AstID:              amet.AstID,
 				GrlText:            amet.GrlText,
 				ThenExpressionList: nil,
@@ -274,6 +290,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 		case TypeWhenScope:
 			amet := meta.(*WhenScopeMeta)
 			n := &WhenScope{
+				logger:     cat.logger,
 				AstID:      amet.AstID,
 				GrlText:    amet.GrlText,
 				Expression: nil,
@@ -381,7 +398,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 					if node, ok := importTable[v]; ok {
 						ThenExprList.ThenExpressions[k] = node.(*ThenExpression)
 					} else {
-						logrus.Errorf("then expression with ast id %s not catalogued", v)
+						cat.logger.Errorf("then expression with ast id %s not catalogued", v)
 					}
 				}
 			}
@@ -417,7 +434,7 @@ func (cat *Catalog) BuildKnowledgeBase() (*KnowledgeBase, error) {
 			if n, ok := importTable[value]; ok {
 				workingMem.variableSnapshotMap[key] = n.(*Variable)
 			} else {
-				logrus.Warnf("snapshot %s in working memory have no referenced variable with ASTID %s", key, value)
+				cat.logger.Warnf("snapshot %s in working memory have no referenced variable with ASTID %s", key, value)
 			}
 		}
 	}

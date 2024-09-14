@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type StructTest struct {
@@ -60,11 +62,13 @@ func TestNegationSymbolExpressionAtom(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("TestNegation", "1.0.0", pkg.NewBytesResource([]byte(NegationRule2)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestNegation", "1.0.0")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)
@@ -82,11 +86,13 @@ func TestNegationSymbolExpression(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("TestNegation", "1.0.0", pkg.NewBytesResource([]byte(NegationRule1)))
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 5}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 5
 	kb, err := lib.NewKnowledgeBaseInstance("TestNegation", "1.0.0")
 	assert.NoError(t, err)
 	err = eng1.Execute(dataContext, kb)

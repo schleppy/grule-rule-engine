@@ -18,7 +18,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+
 	"reflect"
 
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
@@ -58,7 +61,7 @@ const (
 )
 
 // NewExpression creates new Expression instance
-func NewExpression() *Expression {
+func NewExpression(logger logger.Logger) *Expression {
 
 	return &Expression{
 		AstID:    unique.NewID(),
@@ -68,6 +71,7 @@ func NewExpression() *Expression {
 
 // Expression AST Graph node
 type Expression struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -116,6 +120,7 @@ func (e *Expression) MakeCatalog(cat *Catalog) {
 // Clone will clone this Expression. The new clone will have an identical structure
 func (e *Expression) Clone(cloneTable *pkg.CloneTable) *Expression {
 	clone := &Expression{
+		logger:   e.logger,
 		AstID:    unique.NewID(),
 		GrlText:  e.GrlText,
 		Operator: e.Operator,
@@ -300,7 +305,7 @@ func (e *Expression) Evaluate(dataContext IDataContext, memory *WorkingMemory) (
 				if e.Value.Kind() == reflect.Bool {
 					e.Value = reflect.ValueOf(!e.Value.Bool())
 				} else {
-					AstLog.Warnf("Expression \"%s\" is a negation to non boolean value, negation is ignored.", e.SingleExpression.GrlText)
+					e.logger.Warnf("Expression \"%s\" is a negation to non boolean value, negation is ignored.", e.SingleExpression.GrlText)
 				}
 			}
 			e.Evaluated = true

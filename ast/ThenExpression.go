@@ -16,20 +16,24 @@ package ast
 
 import (
 	"bytes"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 // NewThenExpression create new instance of ThenExpression
-func NewThenExpression() *ThenExpression {
+func NewThenExpression(logger logger.Logger) *ThenExpression {
 
 	return &ThenExpression{
-		AstID: unique.NewID(),
+		logger: logger,
+		AstID:  unique.NewID(),
 	}
 }
 
 // ThenExpression AST graph node
 type ThenExpression struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -66,6 +70,7 @@ type ThenExpressionReceiver interface {
 // Clone will clone this ThenExpression. The new clone will have an identical structure
 func (e *ThenExpression) Clone(cloneTable *pkg.CloneTable) *ThenExpression {
 	clone := &ThenExpression{
+		logger:  e.logger,
 		AstID:   unique.NewID(),
 		GrlText: e.GrlText,
 	}
@@ -146,9 +151,9 @@ func (e *ThenExpression) Execute(dataContext IDataContext, memory *WorkingMemory
 	if e.Assignment != nil {
 		err := e.Assignment.Execute(dataContext, memory)
 		if err != nil {
-			AstLog.Errorf("error while executing assignment %s. got %s", e.Assignment.GrlText, err.Error())
+			e.logger.Errorf("error while executing assignment %s. got %s", e.Assignment.GrlText, err.Error())
 		} else {
-			AstLog.Debugf("success executing assignment %s", e.Assignment.GrlText)
+			e.logger.Debugf("success executing assignment %s", e.Assignment.GrlText)
 		}
 
 		return err
@@ -156,11 +161,11 @@ func (e *ThenExpression) Execute(dataContext IDataContext, memory *WorkingMemory
 	if e.ExpressionAtom != nil {
 		_, err := e.ExpressionAtom.Evaluate(dataContext, memory)
 		if err != nil {
-			AstLog.Errorf("error while executing expression %s. got %s", e.ExpressionAtom.GrlText, err.Error())
+			e.logger.Errorf("error while executing expression %s. got %s", e.ExpressionAtom.GrlText, err.Error())
 
 			return err
 		}
-		AstLog.Debugf("success executing ExpressionAtom %s", e.ExpressionAtom.GrlText)
+		e.logger.Debugf("success executing ExpressionAtom %s", e.ExpressionAtom.GrlText)
 
 		return nil
 	}

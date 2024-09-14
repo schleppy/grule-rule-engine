@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -38,15 +40,17 @@ rule CallingLog "Calling a log" {
 func TestCallingLog(t *testing.T) {
 	dataContext := ast.NewDataContext()
 
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 	err := ruleBuilder.BuildRuleFromResource("CallingLog", "0.1.1", pkg.NewBytesResource([]byte(GRL)))
 	assert.NoError(t, err)
 
 	knowledgeBase, err := lib.NewKnowledgeBaseInstance("CallingLog", "0.1.1")
 	assert.NoError(t, err)
 
-	eng1 := &engine.GruleEngine{MaxCycle: 1}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 1
 	err = eng1.Execute(dataContext, knowledgeBase)
 	assert.NoError(t, err)
 }

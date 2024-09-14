@@ -16,8 +16,6 @@ package antlr
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
 
@@ -28,45 +26,11 @@ import (
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
-var (
-	// loggerV3Fields default fields for grule
-	loggerV3Fields = logger.Fields{
-		"lib":    "grule",
-		"struct": "GruleParserV3Listener",
-	}
-
-	// LoggerV3 is a logger instance twith default fields for grule
-	LoggerV3 = logger.Log.WithFields(loggerV3Fields)
-)
-
-// SetLogger changes default logger on external
-func SetLogger(log interface{}) {
-	var entry logger.LogEntry
-
-	switch log.(type) {
-	case *zap.Logger:
-		log, ok := log.(*zap.Logger)
-		if !ok {
-			return
-		}
-		entry = logger.NewZap(log)
-	case *logrus.Logger:
-		log, ok := log.(*logrus.Logger)
-		if !ok {
-			return
-		}
-		entry = logger.NewLogrus(log)
-	default:
-		return
-	}
-
-	LoggerV3 = entry.WithFields(loggerV3Fields)
-}
-
 // NewGruleV3ParserListener create new instance of GruleV3ParserListener
-func NewGruleV3ParserListener(KnowledgeBase *ast.KnowledgeBase, errorCallBack *pkg.GruleErrorReporter) *GruleV3ParserListener {
+func NewGruleV3ParserListener(logger logger.Logger, KnowledgeBase *ast.KnowledgeBase, errorCallBack *pkg.GruleErrorReporter) *GruleV3ParserListener {
 
 	return &GruleV3ParserListener{
+		logger:        logger,
 		PreviousNode:  make([]string, 0),
 		ErrorCallback: errorCallBack,
 		KnowledgeBase: KnowledgeBase,
@@ -78,6 +42,7 @@ func NewGruleV3ParserListener(KnowledgeBase *ast.KnowledgeBase, errorCallBack *p
 // defined within the knowledge base.
 type GruleV3ParserListener struct {
 	grulev3.Basegrulev3Listener
+	logger       logger.Logger
 	PreviousNode []string
 
 	Grl           *ast.Grl
@@ -101,7 +66,7 @@ func (thisListener *GruleV3ParserListener) VisitTerminal(node antlr.TerminalNode
 
 // VisitErrorNode is called when an error node is visited.
 func (thisListener *GruleV3ParserListener) VisitErrorNode(node antlr.ErrorNode) {
-	LoggerV3.Errorf("GRL error, after '%v' and then unexpected '%thisListener'", thisListener.PreviousNode, node.GetText())
+	thisListener.logger.Errorf("GRL error, after '%v' and then unexpected '%thisListener'", thisListener.PreviousNode, node.GetText())
 	thisListener.StopParse = true
 }
 
@@ -142,7 +107,7 @@ func (thisListener *GruleV3ParserListener) EnterRuleEntry(ctx *grulev3.RuleEntry
 
 		return
 	}
-	entry := ast.NewRuleEntry()
+	entry := ast.NewRuleEntry(thisListener.logger)
 	entry.GrlText = ctx.GetText()
 	thisListener.Stack.Push(entry)
 }
@@ -178,7 +143,7 @@ func (thisListener *GruleV3ParserListener) ExitRuleEntry(ctx *grulev3.RuleEntryC
 	if err != nil {
 		thisListener.ErrorCallback.AddError(err)
 	} else {
-		LoggerV3.Debugf("Added RuleEntry : %thisListener", entry.RuleName)
+		thisListener.logger.Debugf("Added RuleEntry : %thisListener", entry.RuleName)
 	}
 }
 
@@ -255,7 +220,7 @@ func (thisListener *GruleV3ParserListener) EnterThenScope(ctx *grulev3.ThenScope
 
 		return
 	}
-	then := ast.NewThenScope()
+	then := ast.NewThenScope(thisListener.logger)
 	then.GrlText = ctx.GetText()
 	thisListener.Stack.Push(then)
 }
@@ -327,7 +292,7 @@ func (thisListener *GruleV3ParserListener) EnterThenExpression(ctx *grulev3.Then
 
 		return
 	}
-	thenExpr := ast.NewThenExpression()
+	thenExpr := ast.NewThenExpression(thisListener.logger)
 	thenExpr.GrlText = ctx.GetText()
 	thisListener.Stack.Push(thenExpr)
 }
@@ -405,7 +370,7 @@ func (thisListener *GruleV3ParserListener) EnterExpression(ctx *grulev3.Expressi
 
 		return
 	}
-	expr := ast.NewExpression()
+	expr := ast.NewExpression(thisListener.logger)
 	expr.GrlText = ctx.GetText()
 	thisListener.Stack.Push(expr)
 }
@@ -568,7 +533,7 @@ func (thisListener *GruleV3ParserListener) EnterExpressionAtom(ctx *grulev3.Expr
 
 		return
 	}
-	atm := ast.NewExpressionAtom()
+	atm := ast.NewExpressionAtom(thisListener.logger)
 	atm.GrlText = ctx.GetText()
 	thisListener.Stack.Push(atm)
 }
@@ -642,7 +607,7 @@ func (thisListener *GruleV3ParserListener) EnterFunctionCall(ctx *grulev3.Functi
 
 		return
 	}
-	fun := ast.NewFunctionCall()
+	fun := ast.NewFunctionCall(thisListener.logger)
 	fun.FunctionName = ctx.SIMPLENAME().GetText()
 	thisListener.Stack.Push(fun)
 }
@@ -701,7 +666,7 @@ func (thisListener *GruleV3ParserListener) ExitArgumentList(ctx *grulev3.Argumen
 
 		return
 	}
-	LoggerV3.Tracef("Adding Argument List To Receiver")
+	thisListener.logger.Tracef("Adding Argument List To Receiver")
 	err := argListRec.AcceptArgumentList(argList)
 	if err != nil {
 		thisListener.StopParse = true

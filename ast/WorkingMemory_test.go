@@ -15,8 +15,10 @@
 package ast
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWorkingMemory_Add(t *testing.T) {
@@ -46,7 +48,7 @@ func TestWorkingMemory_Add(t *testing.T) {
 		RightExpression: &Expression{ExpressionAtom: &ExpressionAtom{Variable: d}},
 		Operator:        OpMul,
 	}
-	wm := NewWorkingMemory("T", "1")
+	wm := NewWorkingMemory(logger.NewDefaultLogger(), "T", "1")
 	wm.AddVariable(a)
 	wm.AddVariable(b)
 	wm.AddVariable(aa)

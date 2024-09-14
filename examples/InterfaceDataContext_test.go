@@ -1,12 +1,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type Vehicle interface {
@@ -55,13 +57,15 @@ then
 		&Motorcycle{price: 90000, name: "Motor A"},
 	}
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("CarPriceTest", "0.1.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("CarPriceTest", "0.1.1")
 	assert.NoError(t, err)
-	eng := &engine.GruleEngine{MaxCycle: 3}
+	eng := engine.NewGruleEngine(logs)
+	eng.MaxCycle = 3
 
 	dataContext := ast.NewDataContext()
 	err = dataContext.Add("v", vehicles)

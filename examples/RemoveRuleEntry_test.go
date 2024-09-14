@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -60,13 +62,15 @@ func TestRemoveRuleEntry(t *testing.T) {
 	assert.NoError(t, err)
 
 	//Load RuleA into knowledgeBase
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(RuleA)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
-	eng := &engine.GruleEngine{MaxCycle: 1}
+	eng := engine.NewGruleEngine(logs)
+	eng.MaxCycle = 1
 	err = eng.Execute(dataContext, kb)
 	assert.NoError(t, err)
 	assert.Equal(t, "Its Grey!!!", color.Message)
@@ -80,7 +84,8 @@ func TestRemoveRuleEntry(t *testing.T) {
 	assert.NoError(t, err)
 	kb, err = lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
-	eng = &engine.GruleEngine{MaxCycle: 1}
+	eng = engine.NewGruleEngine(logs)
+	eng.MaxCycle = 1
 	err = eng.Execute(dataContext, kb)
 	assert.NoError(t, err)
 	assert.Equal(t, "Its Black!!!", color.Message)

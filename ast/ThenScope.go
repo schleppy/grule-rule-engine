@@ -16,20 +16,24 @@ package ast
 
 import (
 	"bytes"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 // NewThenScope will create new instance of ThenScope
-func NewThenScope() *ThenScope {
+func NewThenScope(logger logger.Logger) *ThenScope {
 
 	return &ThenScope{
-		AstID: unique.NewID(),
+		logger: logger,
+		AstID:  unique.NewID(),
 	}
 }
 
 // ThenScope AST graph node
 type ThenScope struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -61,6 +65,7 @@ type ThenScopeReceiver interface {
 // Clone will clone this ThenScope. The new clone will have an identical structure
 func (e *ThenScope) Clone(cloneTable *pkg.CloneTable) *ThenScope {
 	clone := &ThenScope{
+		logger:  e.logger,
 		AstID:   unique.NewID(),
 		GrlText: e.GrlText,
 	}
@@ -119,7 +124,7 @@ func (e *ThenScope) SetGrlText(grlText string) {
 // Execute will execute this graph in the Then scope
 func (e *ThenScope) Execute(dataContext IDataContext, memory *WorkingMemory) error {
 	if e.ThenExpressionList == nil {
-		AstLog.Warnf("Can not execute nil expression list")
+		e.logger.Warnf("Can not execute nil expression list")
 	}
 
 	return e.ThenExpressionList.Execute(dataContext, memory)

@@ -16,15 +16,17 @@ package examples
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	antlr2 "github.com/hyperjumptech/grule-rule-engine/antlr"
 	parser3 "github.com/hyperjumptech/grule-rule-engine/antlr/parser/grulev3"
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (
@@ -80,8 +82,9 @@ func (cf *ItemPriceChecker) CheckPrices(t *testing.T) {
 		Price: 110,
 	})
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 
 	// Prepare knowledgebase and load it with our rule.
 	err := rb.BuildRuleFromResource("PriceCheck", "0.0.1", pkg.NewBytesResource([]byte(PriceCheckRule1)))
@@ -91,7 +94,7 @@ func (cf *ItemPriceChecker) CheckPrices(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Prepare the engine
-	eng := engine.NewGruleEngine()
+	eng := engine.NewGruleEngine(logs)
 
 	// Execute every item in to the engine.
 	// Handling of the array is this program's job.
@@ -164,8 +167,9 @@ func (cf *ItemPriceChecker) CheckCart(t *testing.T) {
 	cart := &ItemCart{Items: items}
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("Cart Check Rules", "0.0.1", pkg.NewBytesResource([]byte(PriceCheckRule2)))
 	assert.NoError(t, err)
 
@@ -173,7 +177,7 @@ func (cf *ItemPriceChecker) CheckCart(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Prepare the engine
-	eng := engine.NewGruleEngine()
+	eng := engine.NewGruleEngine(logs)
 
 	dctx := ast.NewDataContext()
 	err = dctx.Add("Cart", cart)
@@ -206,13 +210,14 @@ func TestItemPriceChecker_TestParser(t *testing.T) {
 	lexer := parser3.Newgrulev3Lexer(nis)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 
-	lib := ast.NewKnowledgeLibrary()
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
 	kb := lib.GetKnowledgeBase("Test", "0.1.1")
 
 	errReporter := &pkg.GruleErrorReporter{
 		Errors: make([]error, 0),
 	}
-	listener := antlr2.NewGruleV3ParserListener(kb, errReporter)
+	listener := antlr2.NewGruleV3ParserListener(logs, kb, errReporter)
 
 	psr := parser3.Newgrulev3Parser(stream)
 	psr.BuildParseTrees = true

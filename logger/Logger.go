@@ -15,7 +15,6 @@
 package logger
 
 import (
-	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 )
 
@@ -75,44 +74,7 @@ type Logger interface {
 	WithFields(keyValues Fields) LogEntry
 }
 
-var (
-	Log LogEntry
-)
-
-func init() {
-	logger := logrus.New()
-	logger.Level = logrus.InfoLevel
-
-	Log = LogEntry{
-		Logger: NewLogrus(logger).WithFields(Fields{"lib": "grule-rule-engine"}),
-		Level:  DebugLevel,
-	}
-}
-
-// SetLogger changes default logger on external
-func SetLogger(externalLog interface{}) {
-	switch externalLog.(type) {
-	case *zap.Logger:
-		log, ok := externalLog.(*zap.Logger)
-		if !ok {
-
-			return
-		}
-		Log = NewZap(log)
-	case *logrus.Logger:
-		log, ok := externalLog.(*logrus.Logger)
-		if !ok {
-
-			return
-		}
-		Log = NewLogrus(log)
-	default:
-
-		return
-	}
-}
-
-// SetLogLevel will set the logger log level
-func SetLogLevel(lvl Level) {
-	Log.Level = lvl
+func NewDefaultLogger() Logger {
+	l := zap.Must(zap.NewProduction())
+	return NewZap(l)
 }

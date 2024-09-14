@@ -2,13 +2,15 @@ package editor
 
 import (
 	"context"
-	mux "github.com/hyperjumptech/hyper-mux"
-	"github.com/sirupsen/logrus"
+
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	mux "github.com/hyperjumptech/hyper-mux"
 )
 
 var (
@@ -22,8 +24,7 @@ func Start() {
 	var wait time.Duration
 	address := "0.0.0.0:32123"
 
-	logrus.Infof("Starting Editor at http://%s", address)
-
+	logs := logger.NewDefaultLogger()
 	srv := &http.Server{
 		Addr:         address,
 		WriteTimeout: 10 * time.Second,
@@ -59,7 +60,7 @@ func Start() {
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.
 	dur := time.Now().Sub(startTime)
-	logrus.Infof("Shutting down. This Satpam been protecting the world for %s", dur.String())
+	logs.Infof("Shutting down. This Satpam been protecting the world for %s", dur.String())
 	os.Exit(0)
 
 }

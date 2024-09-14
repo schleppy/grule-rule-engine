@@ -15,9 +15,11 @@
 package ast
 
 import (
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/stretchr/testify/assert"
 )
 
 type TestStructShenScope struct {
@@ -40,7 +42,7 @@ func TestNewWhenScope(t *testing.T) {
 	assert.Nil(t, ws.AcceptExpression(expr1), "Error when first time accept expression")
 	assert.NotNil(t, ws.AcceptExpression(expr1), "Not Error when second time time accept expression")
 
-	wm := NewWorkingMemory("T", "1")
+	wm := NewWorkingMemory(logger.NewDefaultLogger(), "T", "1")
 	dt := NewDataContext()
 	test := &TestStructShenScope{
 		StringA: "abc",
@@ -66,7 +68,7 @@ func TestNewWhenScopeEvaluate(t *testing.T) {
 			},
 		},
 	}
-	wm := NewWorkingMemory("T", "1")
+	wm := NewWorkingMemory(logger.NewDefaultLogger(), "T", "1")
 	dt := NewDataContext()
 	val, err := expr1.Evaluate(dt, wm)
 	assert.NoError(t, err)

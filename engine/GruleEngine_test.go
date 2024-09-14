@@ -24,6 +24,7 @@ import (
 
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
 )
@@ -117,11 +118,12 @@ func TestGrule_Execute(t *testing.T) {
 	err = dctx.Add("DistanceRecord", dr)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(rules)))
 	assert.NoError(t, err)
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 	start := time.Now()
@@ -152,12 +154,13 @@ func TestEngine_ExecuteErr(t *testing.T) {
 	err := dctx.Add("TestStruct", &TestStruct{})
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(rules)))
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	engine.ReturnErrOnFailedRuleEvaluation = true
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
@@ -213,14 +216,15 @@ func TestEngine_ComplexRule1(t *testing.T) {
 	err := dctx.Add("TestStruct", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(complexRule1)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -249,14 +253,15 @@ func TestEngine_ComplexRule2(t *testing.T) {
 	err := dctx.Add("TestStruct", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(complexRule2)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -286,14 +291,15 @@ func TestEngine_ComplexRule3(t *testing.T) {
 	err := dctx.Add("TestStruct", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(complexRule3)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -324,14 +330,15 @@ func TestEngine_ComplexRule4(t *testing.T) {
 	err := dctx.Add("TestStruct", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(complexRule4)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -354,14 +361,15 @@ func TestEngine_OperatorPrecedence(t *testing.T) {
 	err := dctx.Add("TestStruct", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(OpPresedenceRule)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -401,8 +409,9 @@ And another`
 	err := dctx.Add("ESTest", es)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(escapedRules)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
@@ -411,7 +420,7 @@ And another`
 	assert.False(t, es.Result1)
 	assert.False(t, es.Result2)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 	assert.NoError(t, err)
 
@@ -435,8 +444,9 @@ func TestGruleEngine_ExecuteWithContext(t *testing.T) {
 	err := dctx.Add("TS", ts)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("TestTimer", "0.1.1", pkg.NewBytesResource([]byte(`
 rule KeepSleep "test string escaping" salience 10 {
     when
@@ -449,7 +459,7 @@ rule KeepSleep "test string escaping" salience 10 {
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("TestTimer", "0.1.1")
 	assert.NoError(t, err)
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err = engine.ExecuteWithContext(ctx, dctx, kb)
@@ -519,15 +529,16 @@ func TestGruleEngine_FetchMatchingRules_Having_Same_Salience(t *testing.T) {
 	dctx := ast.NewDataContext()
 	err := dctx.Add("Fact", fact)
 	assert.NoError(t, err)
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("conflict_rules_test", "0.1.1", pkg.NewBytesResource([]byte(duplicateRules)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("conflict_rules_test", "0.1.1")
 	assert.NoError(t, err)
 
 	//When
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	ruleEntries, err := engine.FetchMatchingRules(dctx, kb)
 
 	//Then
@@ -540,12 +551,13 @@ func TestEngine_FetchMatchingRulesErr(t *testing.T) {
 	err := dctx.Add("TestStruct", &TestStruct{})
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(rules)))
 	assert.NoError(t, err)
 
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	engine.ReturnErrOnFailedRuleEvaluation = true
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
@@ -605,15 +617,16 @@ func TestGruleEngine_FetchMatchingRules_Having_Diff_Salience(t *testing.T) {
 	dctx := ast.NewDataContext()
 	err := dctx.Add("Fact", fact)
 	assert.NoError(t, err)
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("conflict_rules_test", "0.1.1", pkg.NewBytesResource([]byte(duplicateRulesWithDiffSalience)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("conflict_rules_test", "0.1.1")
 	assert.NoError(t, err)
 
 	//When
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	ruleEntries, err := engine.FetchMatchingRules(dctx, kb)
 
 	//Then
@@ -669,15 +682,16 @@ func TestGruleEngine_Follows_logical_operator_precedence(t *testing.T) {
 	dctx := ast.NewDataContext()
 	err := dctx.Add("Fact", fact)
 	assert.NoError(t, err)
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err = rb.BuildRuleFromResource("logical_operator_rules_test", "0.1.1", pkg.NewBytesResource([]byte(logicalOperatorPrecedenceRules)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("logical_operator_rules_test", "0.1.1")
 	assert.NoError(t, err)
 
 	//When
-	engine := NewGruleEngine()
+	engine := NewGruleEngine(logs)
 	err = engine.Execute(dctx, kb)
 
 	//Then

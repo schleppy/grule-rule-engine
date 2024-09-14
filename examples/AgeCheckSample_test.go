@@ -16,12 +16,14 @@ package examples
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -78,13 +80,15 @@ func TestMyPoGo_GetStringLength(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 	err = ruleBuilder.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(rule2)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 1}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 1
 	err = eng1.Execute(dataContext, kb)
 	assert.NoError(t, err)
 	assert.Equal(t, "String len above 0", pogo.Result)
@@ -107,14 +111,16 @@ func TestMyPoGo_Compare(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 
 	err = ruleBuilder.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(rule3)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("Test", "0.1.1")
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 100}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 100
 	err = eng1.Execute(dataContext, kb)
 	assert.NoError(t, err)
 	t.Log(user)

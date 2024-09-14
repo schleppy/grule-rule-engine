@@ -15,16 +15,19 @@
 package builder
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestNoPanic(t *testing.T) {
 	GRL := `rule TestNoDesc { when true then Ok(); }`
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := NewRuleBuilder(logs, lib)
 	err := ruleBuilder.BuildRuleFromResource("CallingLog", "0.1.1", pkg.NewBytesResource([]byte(GRL)))
 	assert.NoError(t, err)
 }
@@ -37,8 +40,9 @@ Then
    Fact.NetAmount=143.320007;
    Fact.Result=true;
 }`
-	lib := ast.NewKnowledgeLibrary()
-	rb := NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("testrule", "0.1.1", pkg.NewBytesResource([]byte(testRule)))
 	assert.NoError(t, err)
 	kb := lib.GetKnowledgeBase("testrule", "0.1.1")

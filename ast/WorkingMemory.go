@@ -16,17 +16,19 @@ package ast
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
 	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
-	"strings"
-	"time"
 )
 
 // NewWorkingMemory create new instance of WorkingMemory
-func NewWorkingMemory(name, version string) *WorkingMemory {
+func NewWorkingMemory(logger logger.Logger, name, version string) *WorkingMemory {
 
 	return &WorkingMemory{
+		logger:                    logger,
 		Name:                      name,
 		Version:                   version,
 		variableSnapshotMap:       make(map[string]*Variable),
@@ -40,6 +42,7 @@ func NewWorkingMemory(name, version string) *WorkingMemory {
 
 // WorkingMemory handles states of expression evaluation status
 type WorkingMemory struct {
+	logger                    logger.Logger
 	Name                      string
 	Version                   string
 	expressionSnapshotMap     map[string]*Expression
@@ -84,26 +87,24 @@ func (workingMem *WorkingMemory) MakeCatalog(cat *Catalog) {
 
 // DebugContent will shows the working memory mapping content
 func (workingMem *WorkingMemory) DebugContent() {
-	if AstLog.Level <= logger.DebugLevel {
-		for varName, vari := range workingMem.variableSnapshotMap {
-			AstLog.Debugf("Variable %s : %s : %s", varName, vari.GrlText, vari.AstID)
+	for varName, vari := range workingMem.variableSnapshotMap {
+		workingMem.logger.Debugf("Variable %s : %s : %s", varName, vari.GrlText, vari.AstID)
 
-			if exprs, ok := workingMem.expressionVariableMap[vari]; ok {
-				AstLog.Debugf("  %d expressions", len(exprs))
-				for i, ex := range exprs {
-					AstLog.Debugf("   expr %d: %s", i, ex.GrlText)
-				}
-			} else {
-				AstLog.Debugf("  no expressions mapped for variable %s", vari.GrlText)
+		if exprs, ok := workingMem.expressionVariableMap[vari]; ok {
+			workingMem.logger.Debugf("  %d expressions", len(exprs))
+			for i, ex := range exprs {
+				workingMem.logger.Debugf("   expr %d: %s", i, ex.GrlText)
 			}
-			if expratms, ok := workingMem.expressionAtomVariableMap[vari]; ok {
-				AstLog.Debugf("  %d expression atoms", len(expratms))
-				for i, ex := range expratms {
-					AstLog.Debugf("   expr atm %d: %s", i, ex.GrlText)
-				}
-			} else {
-				AstLog.Debugf("  no expressions atom mapped for variable %s", vari.GrlText)
+		} else {
+			workingMem.logger.Debugf("  no expressions mapped for variable %s", vari.GrlText)
+		}
+		if expratms, ok := workingMem.expressionAtomVariableMap[vari]; ok {
+			workingMem.logger.Debugf("  %d expression atoms", len(expratms))
+			for i, ex := range expratms {
+				workingMem.logger.Debugf("   expr atm %d: %s", i, ex.GrlText)
 			}
+		} else {
+			workingMem.logger.Debugf("  no expressions atom mapped for variable %s", vari.GrlText)
 		}
 	}
 }
@@ -144,11 +145,11 @@ func (workingMem *WorkingMemory) Equals(that *WorkingMemory) bool {
 
 // Clone will clone this WorkingMemory. The new clone will have an identical structure
 func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemory, error) {
-	AstLog.Debugf("Cloning working memory %s:%s", workingMem.Name, workingMem.Version)
-	clone := NewWorkingMemory(workingMem.Name, workingMem.Version)
+	workingMem.logger.Debugf("Cloning working memory %s:%s", workingMem.Name, workingMem.Version)
+	clone := NewWorkingMemory(workingMem.logger, workingMem.Name, workingMem.Version)
 
 	if workingMem.expressionSnapshotMap != nil {
-		AstLog.Debugf("Cloning %d expressionSnapshotMap entries", len(workingMem.expressionSnapshotMap))
+		workingMem.logger.Debugf("Cloning %d expressionSnapshotMap entries", len(workingMem.expressionSnapshotMap))
 		for k, expr := range workingMem.expressionSnapshotMap {
 			if cloneTable.IsCloned(expr.AstID) {
 				clone.expressionSnapshotMap[k] = cloneTable.Records[expr.AstID].CloneInstance.(*Expression)
@@ -160,7 +161,7 @@ func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemo
 	}
 
 	if workingMem.expressionAtomSnapshotMap != nil {
-		AstLog.Debugf("Cloning %d expressionAtomSnapshotMap entries", len(workingMem.expressionAtomSnapshotMap))
+		workingMem.logger.Debugf("Cloning %d expressionAtomSnapshotMap entries", len(workingMem.expressionAtomSnapshotMap))
 		for k, exprAtm := range workingMem.expressionAtomSnapshotMap {
 			if cloneTable.IsCloned(exprAtm.AstID) {
 				clone.expressionAtomSnapshotMap[k] = cloneTable.Records[exprAtm.AstID].CloneInstance.(*ExpressionAtom)
@@ -172,7 +173,7 @@ func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemo
 	}
 
 	if workingMem.variableSnapshotMap != nil {
-		AstLog.Debugf("Cloning %d variableSnapshotMap entries", len(workingMem.variableSnapshotMap))
+		workingMem.logger.Debugf("Cloning %d variableSnapshotMap entries", len(workingMem.variableSnapshotMap))
 		for key, variable := range workingMem.variableSnapshotMap {
 			if cloneTable.IsCloned(variable.AstID) {
 				clone.variableSnapshotMap[key] = cloneTable.Records[variable.AstID].CloneInstance.(*Variable)
@@ -184,7 +185,7 @@ func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemo
 	}
 
 	if workingMem.expressionVariableMap != nil {
-		AstLog.Debugf("Cloning %d expressionVariableMap entries", len(workingMem.expressionVariableMap))
+		workingMem.logger.Debugf("Cloning %d expressionVariableMap entries", len(workingMem.expressionVariableMap))
 		for key, exprArr := range workingMem.expressionVariableMap {
 			if cloneTable.IsCloned(key.AstID) {
 				clonedVari := cloneTable.Records[key.AstID].CloneInstance.(*Variable)
@@ -205,7 +206,7 @@ func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemo
 	}
 
 	if workingMem.expressionAtomVariableMap != nil {
-		AstLog.Debugf("Cloning %d expressionAtomVariableMap entries", len(workingMem.expressionAtomVariableMap))
+		workingMem.logger.Debugf("Cloning %d expressionAtomVariableMap entries", len(workingMem.expressionAtomVariableMap))
 		for key, exprAtmArr := range workingMem.expressionAtomVariableMap {
 			if cloneTable.IsCloned(key.AstID) {
 				clonedVari := cloneTable.Records[key.AstID].CloneInstance.(*Variable)
@@ -236,13 +237,11 @@ func (workingMem *WorkingMemory) Clone(cloneTable *pkg.CloneTable) (*WorkingMemo
 
 // IndexVariables will index all expression and expression atoms that contains a speciffic variable name
 func (workingMem *WorkingMemory) IndexVariables() {
-	if AstLog.Level <= logger.DebugLevel {
-		AstLog.Debugf("Indexing %d expressions, %d expression atoms and %d variables.", len(workingMem.expressionSnapshotMap), len(workingMem.expressionAtomSnapshotMap), len(workingMem.variableSnapshotMap))
-	}
+	workingMem.logger.Debugf("Indexing %d expressions, %d expression atoms and %d variables.", len(workingMem.expressionSnapshotMap), len(workingMem.expressionAtomSnapshotMap), len(workingMem.variableSnapshotMap))
 	start := time.Now()
 	defer func() {
 		dur := time.Since(start)
-		AstLog.Tracef("Working memory indexing takes %d ms", dur/time.Millisecond)
+		workingMem.logger.Tracef("Working memory indexing takes %d ms", dur/time.Millisecond)
 	}()
 	workingMem.expressionVariableMap = make(map[*Variable][]*Expression)
 	workingMem.expressionAtomVariableMap = make(map[*Variable][]*ExpressionAtom)
@@ -276,11 +275,11 @@ func (workingMem *WorkingMemory) IndexVariables() {
 func (workingMem *WorkingMemory) AddExpression(exp *Expression) *Expression {
 	snapshot := exp.GetSnapshot()
 	if expr, ok := workingMem.expressionSnapshotMap[snapshot]; ok {
-		AstLog.Tracef("%s : Ignored Expression Snapshot : %s", workingMem.ID, snapshot)
+		workingMem.logger.Tracef("%s : Ignored Expression Snapshot : %s", workingMem.ID, snapshot)
 
 		return expr
 	}
-	AstLog.Tracef("%s : Added Expression Snapshot : %s", workingMem.ID, snapshot)
+	workingMem.logger.Tracef("%s : Added Expression Snapshot : %s", workingMem.ID, snapshot)
 	workingMem.expressionSnapshotMap[snapshot] = exp
 
 	return exp
@@ -291,11 +290,11 @@ func (workingMem *WorkingMemory) AddExpression(exp *Expression) *Expression {
 func (workingMem *WorkingMemory) AddExpressionAtom(exp *ExpressionAtom) *ExpressionAtom {
 	snapshot := exp.GetSnapshot()
 	if expr, ok := workingMem.expressionAtomSnapshotMap[snapshot]; ok {
-		AstLog.Tracef("%s : Ignored ExpressionAtom Snapshot : %s", workingMem.ID, snapshot)
+		workingMem.logger.Tracef("%s : Ignored ExpressionAtom Snapshot : %s", workingMem.ID, snapshot)
 
 		return expr
 	}
-	AstLog.Tracef("%s : Added ExpressionAtom Snapshot : %s", workingMem.ID, snapshot)
+	workingMem.logger.Tracef("%s : Added ExpressionAtom Snapshot : %s", workingMem.ID, snapshot)
 	workingMem.expressionAtomSnapshotMap[snapshot] = exp
 
 	return exp
@@ -306,11 +305,11 @@ func (workingMem *WorkingMemory) AddExpressionAtom(exp *ExpressionAtom) *Express
 func (workingMem *WorkingMemory) AddVariable(vari *Variable) *Variable {
 	snapshot := vari.GetSnapshot()
 	if v, ok := workingMem.variableSnapshotMap[snapshot]; ok {
-		AstLog.Tracef("%s : Ignored Variable Snapshot : %s", workingMem.ID, snapshot)
+		workingMem.logger.Tracef("%s : Ignored Variable Snapshot : %s", workingMem.ID, snapshot)
 
 		return v
 	}
-	AstLog.Tracef("%s : Added Variable Snapshot : %s", workingMem.ID, snapshot)
+	workingMem.logger.Tracef("%s : Added Variable Snapshot : %s", workingMem.ID, snapshot)
 	workingMem.variableSnapshotMap[snapshot] = vari
 
 	return vari
@@ -319,7 +318,7 @@ func (workingMem *WorkingMemory) AddVariable(vari *Variable) *Variable {
 // Reset will reset the evaluated status of a specific variable if its contains a variable name in its signature.
 // Returns true if any expression was reset, false if otherwise
 func (workingMem *WorkingMemory) Reset(name string) bool {
-	AstLog.Tracef("------- resetting  %s", name)
+	workingMem.logger.Tracef("------- resetting  %s", name)
 	for _, vari := range workingMem.variableSnapshotMap {
 		if vari.GrlText == name {
 
@@ -343,28 +342,26 @@ func (workingMem *WorkingMemory) Reset(name string) bool {
 // ResetVariable will reset the evaluated status of a specific expression if its contains a variable name in its signature.
 // Returns true if any expression was reset, false if otherwise
 func (workingMem *WorkingMemory) ResetVariable(variable *Variable) bool {
-	AstLog.Tracef("------- resetting variable %s : %s", variable.GrlText, variable.AstID)
-	if AstLog.Level == logger.TraceLevel {
-		AstLog.Tracef("%s : Resetting %s", workingMem.ID, variable.GetSnapshot())
-	}
+	workingMem.logger.Tracef("------- resetting variable %s : %s", variable.GrlText, variable.AstID)
+	workingMem.logger.Tracef("%s : Resetting %s", workingMem.ID, variable.GetSnapshot())
 	reseted := false
 	if arr, ok := workingMem.expressionVariableMap[variable]; ok {
 		for _, expr := range arr {
-			AstLog.Tracef("------ reset expr : %s", expr.GrlText)
+			workingMem.logger.Tracef("------ reset expr : %s", expr.GrlText)
 			expr.Evaluated = false
 			reseted = true
 		}
 	} else {
-		AstLog.Warnf("No expression to reset for variable %s", variable.GrlText)
+		workingMem.logger.Warnf("No expression to reset for variable %s", variable.GrlText)
 	}
 	if arr, ok := workingMem.expressionAtomVariableMap[variable]; ok {
 		for _, expr := range arr {
-			AstLog.Tracef("------ reset expr atm : %s", expr.GrlText)
+			workingMem.logger.Tracef("------ reset expr atm : %s", expr.GrlText)
 			expr.Evaluated = false
 			reseted = true
 		}
 	} else {
-		AstLog.Warnf("No expression atom to reset for variable %s", variable.GrlText)
+		workingMem.logger.Warnf("No expression atom to reset for variable %s", variable.GrlText)
 	}
 
 	return reseted

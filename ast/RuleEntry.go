@@ -18,16 +18,20 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+
 	"reflect"
 
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 // NewRuleEntry create new instance of RuleEntry
-func NewRuleEntry() *RuleEntry {
+func NewRuleEntry(logger logger.Logger) *RuleEntry {
 
 	return &RuleEntry{
+		logger:          logger,
 		AstID:           unique.NewID(),
 		RuleName:        "No Name",
 		Salience:        0,
@@ -37,6 +41,7 @@ func NewRuleEntry() *RuleEntry {
 
 // RuleEntry AST graph node
 type RuleEntry struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -103,6 +108,7 @@ func (e *RuleEntry) AcceptThenScope(thenScope *ThenScope) error {
 // Clone will clone this RuleEntry. The new clone will have an identical structure
 func (e *RuleEntry) Clone(cloneTable *pkg.CloneTable) *RuleEntry {
 	clone := &RuleEntry{
+		logger:          e.logger,
 		AstID:           unique.NewID(),
 		GrlText:         e.GrlText,
 		RuleName:        e.RuleName,
@@ -181,7 +187,7 @@ func (e *RuleEntry) Evaluate(ctx context.Context, dataContext IDataContext, memo
 	}
 	val, err := e.WhenScope.Evaluate(dataContext, memory)
 	if err != nil {
-		AstLog.Errorf("Error while evaluating rule %s, got %v", e.RuleName, err)
+		e.logger.Errorf("Error while evaluating rule %s, got %v", e.RuleName, err)
 
 		return false, fmt.Errorf("evaluating expression in rule '%s' the when raised an error. got %v", dataContext.GetRuleEntry().RuleName, err)
 	}

@@ -21,13 +21,16 @@ import (
 	"embed"
 	"strings"
 	"testing"
+
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 )
 
 //go:embed test
 var rules embed.FS
 
 func TestEmbeddedResourceBundle_Load(t *testing.T) {
-	erb := NewEmbeddedResourceBundle(rules, ".", "/**/*.grl")
+	logs := logger.NewDefaultLogger()
+	erb := NewEmbeddedResourceBundle(logs, rules, ".", "/**/*.grl")
 	resources := erb.MustLoad()
 	if len(resources) != 6 {
 		t.Errorf("Expected 6 but get %d", len(resources))

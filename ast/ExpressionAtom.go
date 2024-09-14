@@ -18,23 +18,27 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
-	"github.com/hyperjumptech/grule-rule-engine/model"
 	"reflect"
+
+	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/hyperjumptech/grule-rule-engine/model"
 
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
 // NewExpressionAtom create new instance of ExpressionAtom
-func NewExpressionAtom() *ExpressionAtom {
+func NewExpressionAtom(logger logger.Logger) *ExpressionAtom {
 
 	return &ExpressionAtom{
-		AstID: unique.NewID(),
+		logger: logger,
+		AstID:  unique.NewID(),
 	}
 }
 
 // ExpressionAtom AST node graph
 type ExpressionAtom struct {
+	logger  logger.Logger
 	AstID   string
 	GrlText string
 
@@ -95,6 +99,7 @@ type ExpressionAtomReceiver interface {
 // Clone will clone this ExpressionAtom. The new clone will have an identical structure
 func (e *ExpressionAtom) Clone(cloneTable *pkg.CloneTable) *ExpressionAtom {
 	clone := &ExpressionAtom{
+		logger:       e.logger,
 		AstID:        unique.NewID(),
 		GrlText:      e.GrlText,
 		VariableName: e.VariableName,
@@ -325,7 +330,7 @@ func (e *ExpressionAtom) Evaluate(dataContext IDataContext, memory *WorkingMemor
 				e.Value = reflect.ValueOf(!e.Value.Bool())
 				e.ValueNode = model.NewGoValueNode(e.Value, fmt.Sprintf("!%s", e.GrlText))
 			} else {
-				AstLog.Warnf("Expression \"%s\" is a negation to non boolean value, negation is ignored.", e.ExpressionAtom.GrlText)
+				e.logger.Warnf("Expression \"%s\" is a negation to non boolean value, negation is ignored.", e.ExpressionAtom.GrlText)
 			}
 		}
 

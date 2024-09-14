@@ -1,10 +1,12 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
-	"testing"
 )
 
 const (
@@ -24,8 +26,9 @@ rule ErrorRule1 "Rule with error"  salience 10{
 func TestParsingErrorDetection(t *testing.T) {
 
 	// Normal stuff, creating a library and builder for it.
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 
 	// Build normally
 	err := ruleBuilder.BuildRuleFromResource("Test", "0.1.1", pkg.NewBytesResource([]byte(RuleWithError)))

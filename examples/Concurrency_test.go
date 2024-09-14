@@ -16,15 +16,16 @@ package examples
 
 import (
 	"fmt"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
 	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"sync"
-	"testing"
-	"time"
 )
 
 const (
@@ -56,10 +57,7 @@ var (
 	// syncD is a mutex object to protect threadFinishMap from concurrent map read/write
 	syncD = sync.Mutex{}
 
-	concurrencyTestlog = logger.Log.WithFields(logger.Fields{
-		"lib":  "grule",
-		"file": "examples/Concurrency_test.go",
-	})
+	concurrencyTestlog = logger.NewDefaultLogger()
 )
 
 // Vibonaci our model
@@ -114,7 +112,8 @@ func beginThread(threadName string, lib *ast.KnowledgeLibrary, t *testing.T) {
 	}
 
 	// Create a new engine for this thread
-	engine := &engine.GruleEngine{MaxCycle: 100}
+	engine := engine.NewGruleEngine(concurrencyTestlog)
+	engine.MaxCycle = 100
 
 	// Get an instance of our KnowledgeBase from KnowledgeLibrary
 	kb, _ := lib.NewKnowledgeBaseInstance("VibonaciTest", "0.0.1")
@@ -145,8 +144,8 @@ func beginThread(threadName string, lib *ast.KnowledgeLibrary, t *testing.T) {
 
 func TestConcurrency(t *testing.T) {
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	lib := ast.NewKnowledgeLibrary(concurrencyTestlog)
+	rb := builder.NewRuleBuilder(concurrencyTestlog, lib)
 	err := rb.BuildRuleFromResource("VibonaciTest", "0.0.1", pkg.NewBytesResource([]byte(VibonaciRule)))
 	assert.NoError(t, err)
 

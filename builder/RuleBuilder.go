@@ -16,11 +16,10 @@ package builder
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/sirupsen/logrus"
-	"go.uber.org/zap"
-	"time"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	antlr2 "github.com/hyperjumptech/grule-rule-engine/antlr"
@@ -28,53 +27,18 @@ import (
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 )
 
-var (
-	// builderLogFields default fields for grule
-	builderLogFields = logger.Fields{
-		"package": "builder",
-	}
-
-	// BuilderLog is a logger instance twith default fields for grule
-	BuilderLog = logger.Log.WithFields(builderLogFields)
-)
-
-// SetLogger changes default logger on external
-func SetLogger(log interface{}) {
-	var entry logger.LogEntry
-
-	switch log.(type) {
-	case *zap.Logger:
-		log, ok := log.(*zap.Logger)
-		if !ok {
-
-			return
-		}
-		entry = logger.NewZap(log)
-	case *logrus.Logger:
-		log, ok := log.(*logrus.Logger)
-		if !ok {
-
-			return
-		}
-		entry = logger.NewLogrus(log)
-	default:
-
-		return
-	}
-
-	BuilderLog = entry.WithFields(builderLogFields)
-}
-
 // NewRuleBuilder creates new RuleBuilder instance. This builder will add all loaded rules into the specified knowledgebase.
-func NewRuleBuilder(KnowledgeLibrary *ast.KnowledgeLibrary) *RuleBuilder {
+func NewRuleBuilder(logger logger.Logger, KnowledgeLibrary *ast.KnowledgeLibrary) *RuleBuilder {
 
 	return &RuleBuilder{
+		logger:           logger,
 		KnowledgeLibrary: KnowledgeLibrary,
 	}
 }
 
 // RuleBuilder builds rule from GRL script into contained KnowledgeBase
 type RuleBuilder struct {
+	logger           logger.Logger
 	KnowledgeLibrary *ast.KnowledgeLibrary
 }
 
@@ -157,7 +121,7 @@ func (builder *RuleBuilder) BuildRuleFromResource(name, version string, resource
 		return fmt.Errorf("KnowledgeBase %s:%s is not in this library", name, version)
 	}
 
-	listener := antlr2.NewGruleV3ParserListener(knowledgeBase, errReporter)
+	listener := antlr2.NewGruleV3ParserListener(builder.logger, knowledgeBase, errReporter)
 
 	psr := parser.Newgrulev3Parser(stream)
 
@@ -171,7 +135,7 @@ func (builder *RuleBuilder) BuildRuleFromResource(name, version string, resource
 	for _, ruleEntry := range grl.RuleEntries {
 		err := knowledgeBase.AddRuleEntry(ruleEntry)
 		if err != nil && err.Error() != "rule entry TestNoDesc already exist" {
-			BuilderLog.Tracef("warning while adding rule entry : %s. got %s, possibly already added by antlr listener", ruleEntry.RuleName, err.Error())
+			builder.logger.Tracef("warning while adding rule entry : %s. got %s, possibly already added by antlr listener", ruleEntry.RuleName, err.Error())
 		}
 	}
 
@@ -181,15 +145,15 @@ func (builder *RuleBuilder) BuildRuleFromResource(name, version string, resource
 	dur := time.Now().Sub(startTime)
 
 	if errReporter.HasError() {
-		BuilderLog.Errorf("GRL syntax error. got %s", errReporter.Error())
+		builder.logger.Errorf("GRL syntax error. got %s", errReporter.Error())
 		for i, errr := range errReporter.Errors {
-			BuilderLog.Errorf("%d : %s", i, errr.Error())
+			builder.logger.Errorf("%d : %s", i, errr.Error())
 		}
 
 		return errReporter
 	}
 
-	BuilderLog.Debugf("Loading rule resource : %s success. Time taken %d ms", resource.String(), dur.Nanoseconds()/1e6)
+	builder.logger.Debugf("Loading rule resource : %s success. Time taken %d ms", resource.String(), dur.Nanoseconds()/1e6)
 
 	return nil
 }

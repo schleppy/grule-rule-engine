@@ -17,13 +17,15 @@ package examples
 import (
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	engine2 "github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 const (
@@ -126,12 +128,13 @@ type CashFlowCalculator struct {
 func (cf *CashFlowCalculator) CalculatePurchases(t *testing.T) {
 	cashFlow := &CashFlow{}
 
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	err := rb.BuildRuleFromResource("Purchase Calculator", "0.0.1", pkg.NewFileResource("CashFlowRule.grl"))
 	assert.NoError(t, err)
 
-	engine := engine2.NewGruleEngine()
+	engine := engine2.NewGruleEngine(logs)
 
 	kb, err := lib.NewKnowledgeBaseInstance("Purchase Calculator", "0.0.1")
 	assert.NoError(t, err)
@@ -142,7 +145,7 @@ func (cf *CashFlowCalculator) CalculatePurchases(t *testing.T) {
 	assert.Nil(t, err)
 
 	buff2 := bytes.NewBuffer(buff.Bytes())
-	cat2 := &ast.Catalog{}
+	cat2 := ast.NewCatalog(logs)
 	cat2.ReadCatalogFromReader(buff2)
 	nkb, err := cat2.BuildKnowledgeBase()
 	assert.NoError(t, err)

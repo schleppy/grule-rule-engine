@@ -4,13 +4,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	mux "github.com/hyperjumptech/hyper-mux"
-	"io/ioutil"
-	"net/http"
 )
 
 type JSONData struct {
@@ -60,8 +62,9 @@ func InitializeEvaluationRoute(router *mux.HyperMux) {
 			}
 		}
 
-		knowledgeLibrary := ast.NewKnowledgeLibrary()
-		ruleBuilder := builder.NewRuleBuilder(knowledgeLibrary)
+		logs := logger.NewDefaultLogger()
+		knowledgeLibrary := ast.NewKnowledgeLibrary(logs)
+		ruleBuilder := builder.NewRuleBuilder(logs, knowledgeLibrary)
 
 		grlByte, err := base64.StdEncoding.DecodeString(evReq.GrlText)
 		if err != nil {
@@ -79,7 +82,8 @@ func InitializeEvaluationRoute(router *mux.HyperMux) {
 			return
 		}
 
-		eng1 := &engine.GruleEngine{MaxCycle: 5}
+		eng1 := engine.NewGruleEngine(logs)
+		eng1.MaxCycle = 5
 		kb, err := knowledgeLibrary.NewKnowledgeBaseInstance("Evaluator", "0.0.1")
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)

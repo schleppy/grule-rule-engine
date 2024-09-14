@@ -16,12 +16,14 @@ package examples
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type ArrayNode struct {
@@ -41,7 +43,6 @@ func (node *ArrayNode) GetChild(idx int64) *ArrayNode {
 }
 
 func TestArraySlice(t *testing.T) {
-	//logrus.SetLevel(logrus.TraceLevel)
 	Tree := &ArrayNode{
 		Name:        "Node",
 		StringArray: []string{"NodeString1", "NodeString2"},
@@ -99,13 +100,15 @@ rule SetTreeName "Set the top most tree name" {
 	err := dataContext.Add("Tree", Tree)
 	assert.NoError(t, err)
 
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 	err = ruleBuilder.BuildRuleFromResource("TestFuncChaining", "0.0.1", pkg.NewBytesResource([]byte(rule)))
 	assert.NoError(t, err)
 	kb, err := lib.NewKnowledgeBaseInstance("TestFuncChaining", "0.0.1")
 	assert.NoError(t, err)
-	eng1 := &engine.GruleEngine{MaxCycle: 1}
+	eng1 := engine.NewGruleEngine(logs)
+	eng1.MaxCycle = 1
 	err = eng1.Execute(dataContext, kb)
 	assert.NoError(t, err)
 	assert.Equal(t, "verified", Tree.Name)

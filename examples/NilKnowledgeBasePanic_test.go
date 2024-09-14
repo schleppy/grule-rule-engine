@@ -19,6 +19,7 @@ import (
 
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -38,15 +39,18 @@ func Test_NoPanicOnEmptyKnowledgeBase(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	logs := logger.NewDefaultLogger()
 	t.Run("with nil knowledge base in execute", func(t *testing.T) {
-		eng := &engine.GruleEngine{MaxCycle: 10}
+		eng := engine.NewGruleEngine(logs)
+		eng.MaxCycle = 10
 		err = eng.Execute(dataContext, nil)
 
 		assert.NotNil(t, err)
 	})
 
 	t.Run("with nil knowledge base in FetchMatchingRules", func(t *testing.T) {
-		eng := &engine.GruleEngine{MaxCycle: 10}
+		eng := engine.NewGruleEngine(logs)
+		eng.MaxCycle = 10
 		_, err = eng.FetchMatchingRules(dataContext, nil)
 
 		assert.NotNil(t, err)

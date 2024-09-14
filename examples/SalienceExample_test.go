@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type ValueData struct {
@@ -115,13 +117,14 @@ func TestSalience(t *testing.T) {
 	}
 
 	// Prepare knowledgebase library and load it with our rule.
-	lib := ast.NewKnowledgeLibrary()
-	rb := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	rb := builder.NewRuleBuilder(logs, lib)
 	byteArr := pkg.NewBytesResource([]byte(SalienceGRL))
 	err := rb.BuildRuleFromResource("Tutorial", "0.0.1", byteArr)
 	assert.NoError(t, err)
 
-	engine := engine.NewGruleEngine()
+	engine := engine.NewGruleEngine(logs)
 
 	knowledgeBase, err := lib.NewKnowledgeBaseInstance("Tutorial", "0.0.1")
 	assert.NoError(t, err)

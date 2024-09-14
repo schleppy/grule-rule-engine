@@ -15,12 +15,14 @@
 package examples
 
 import (
+	"testing"
+
 	"github.com/hyperjumptech/grule-rule-engine/ast"
 	"github.com/hyperjumptech/grule-rule-engine/builder"
 	"github.com/hyperjumptech/grule-rule-engine/engine"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
 	"github.com/hyperjumptech/grule-rule-engine/pkg"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // Tests for to check whether Grules support multiple KnowledgeBases
@@ -87,8 +89,9 @@ func TestGruleEngine_Support_Multiple_KnowledgeBases(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lib := ast.NewKnowledgeLibrary()
-	ruleBuilder := builder.NewRuleBuilder(lib)
+	logs := logger.NewDefaultLogger()
+	lib := ast.NewKnowledgeLibrary(logs)
+	ruleBuilder := builder.NewRuleBuilder(logs, lib)
 
 	//When
 	err = ruleBuilder.BuildRuleFromResource("UserRules", "0.1.1", pkg.NewBytesResource([]byte(UserRule)))
@@ -103,7 +106,7 @@ func TestGruleEngine_Support_Multiple_KnowledgeBases(t *testing.T) {
 	assert.NoError(t, err)
 	rideKnowledgeBase, err := lib.NewKnowledgeBaseInstance("RideRules", "0.1.1")
 	assert.NoError(t, err)
-	eng1 := engine.NewGruleEngine()
+	eng1 := engine.NewGruleEngine(logs)
 	err = eng1.Execute(rideDataContext, rideKnowledgeBase)
 	if err != nil {
 		t.Fatalf("Got error %v", err)

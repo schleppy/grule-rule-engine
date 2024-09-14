@@ -17,7 +17,10 @@ package ast
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/hyperjumptech/grule-rule-engine/logger"
+
 	"io"
 	"sort"
 	"strings"
@@ -27,15 +30,17 @@ import (
 )
 
 // NewKnowledgeLibrary create a new instance KnowledgeLibrary
-func NewKnowledgeLibrary() *KnowledgeLibrary {
+func NewKnowledgeLibrary(logger logger.Logger) *KnowledgeLibrary {
 
 	return &KnowledgeLibrary{
+		logger:  logger,
 		Library: make(map[string]*KnowledgeBase),
 	}
 }
 
 // KnowledgeLibrary is a knowledgebase store.
 type KnowledgeLibrary struct {
+	logger  logger.Logger
 	Library map[string]*KnowledgeBase
 }
 
@@ -52,7 +57,7 @@ func (lib *KnowledgeLibrary) GetKnowledgeBase(name, version string) *KnowledgeBa
 		Name:          name,
 		Version:       version,
 		RuleEntries:   make(map[string]*RuleEntry),
-		WorkingMemory: NewWorkingMemory(name, version),
+		WorkingMemory: NewWorkingMemory(lib.logger, name, version),
 	}
 	lib.Library[fmt.Sprintf("%s:%s", name, version)] = knowledgeBase
 
@@ -136,12 +141,12 @@ func (lib *KnowledgeLibrary) NewKnowledgeBaseInstance(name, version string) (*Kn
 			return nil, err
 		}
 		if knowledgeBase.IsIdentical(newClone) {
-			AstLog.Debugf("Successfully create instance [%s:%s]", newClone.Name, newClone.Version)
+			lib.logger.Debugf("Successfully create instance [%s:%s]", newClone.Name, newClone.Version)
 
 			return newClone, nil
 		}
-		AstLog.Fatalf("ORIGIN   : %s", knowledgeBase.GetSnapshot())
-		AstLog.Fatalf("CLONE    : %s", newClone.GetSnapshot())
+		lib.logger.Fatalf("ORIGIN   : %s", knowledgeBase.GetSnapshot())
+		lib.logger.Fatalf("CLONE    : %s", newClone.GetSnapshot())
 
 		return nil, fmt.Errorf("the clone is not identical")
 	}
@@ -151,6 +156,7 @@ func (lib *KnowledgeLibrary) NewKnowledgeBaseInstance(name, version string) (*Kn
 
 // KnowledgeBase is a collection of RuleEntries. It has a name and version.
 type KnowledgeBase struct {
+	logger        logger.Logger
 	lock          sync.Mutex
 	Name          string
 	Version       string
@@ -165,6 +171,7 @@ type KnowledgeBase struct {
 // This function also will catalog the WorkingMemory.
 func (e *KnowledgeBase) MakeCatalog() *Catalog {
 	catalog := &Catalog{
+		logger:                          e.logger,
 		KnowledgeBaseName:               e.Name,
 		KnowledgeBaseVersion:            e.Version,
 		Data:                            nil,
@@ -217,6 +224,7 @@ func (e *KnowledgeBase) GetSnapshot() string {
 // Clone will clone this instance of KnowledgeBase and produce another (structure wise) identical instance.
 func (e *KnowledgeBase) Clone(cloneTable *pkg.CloneTable) (*KnowledgeBase, error) {
 	clone := &KnowledgeBase{
+		logger:      e.logger,
 		Name:        e.Name,
 		Version:     e.Version,
 		RuleEntries: make(map[string]*RuleEntry),
