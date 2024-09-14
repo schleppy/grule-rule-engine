@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hyperjumptech/grule-rule-engine/editor/mime"
-	mux "github.com/hyperjumptech/hyper-mux"
+	"github.com/schleppy/grule-rule-engine/editor/mime"
+	mux "github.com/schleppy/hyper-mux"
 )
 
 //go:embed statics

@@ -1,7 +1,7 @@
 //go:build go1.16
 // +build go1.16
 
-//  Copyright hyperjumptech/grule-rule-engine Authors
+//  Copyright schleppy/grule-rule-engine Authors
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/logger"
 )
 
 //go:embed test

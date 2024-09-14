@@ -3,10 +3,10 @@ package examples
 import (
 	"testing"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/schleppy/grule-rule-engine/ast"
+	"github.com/schleppy/grule-rule-engine/builder"
+	"github.com/schleppy/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/pkg"
 )
 
 const (

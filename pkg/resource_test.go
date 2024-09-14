@@ -1,4 +1,4 @@
-//  Copyright hyperjumptech/grule-rule-engine Authors
+//  Copyright schleppy/grule-rule-engine Authors
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/logger"
 )
 
 const (
@@ -85,7 +85,7 @@ func TestNewURLResource(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping URL resource test in short mode")
 	}
-	urlResource := NewURLResource("https://raw.githubusercontent.com/hyperjumptech/grule-rule-engine/master/LICENSE-2.0.txt")
+	urlResource := NewURLResource("https://raw.githubusercontent.com/schleppy/grule-rule-engine/master/LICENSE-2.0.txt")
 	loadedURL, err := urlResource.Load()
 	if err != nil {
 		t.Error("Failed to load url resource", err)
@@ -110,7 +110,7 @@ func TestGitResource(t *testing.T) {
 	}
 	gitRb := &GITResourceBundle{
 		logger: logger.NewDefaultLogger(),
-		URL:    "https://github.com/hyperjumptech/grule-rule-engine.git",
+		URL:    "https://github.com/schleppy/grule-rule-engine.git",
 		PathPattern: []string{
 			"/antlr/*.grl",
 		},

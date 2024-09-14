@@ -1,4 +1,4 @@
-//  Copyright hyperjumptech/grule-rule-engine Authors
+//  Copyright schleppy/grule-rule-engine Authors
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/ast"
+	"github.com/schleppy/grule-rule-engine/logger"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
-	antlr2 "github.com/hyperjumptech/grule-rule-engine/antlr"
-	parser "github.com/hyperjumptech/grule-rule-engine/antlr/parser/grulev3"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	antlr2 "github.com/schleppy/grule-rule-engine/antlr"
+	parser "github.com/schleppy/grule-rule-engine/antlr/parser/grulev3"
+	"github.com/schleppy/grule-rule-engine/pkg"
 )
 
 // NewRuleBuilder creates new RuleBuilder instance. This builder will add all loaded rules into the specified knowledgebase.

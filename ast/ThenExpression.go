@@ -1,4 +1,4 @@
-//  Copyright hyperjumptech/grule-rule-engine Authors
+//  Copyright schleppy/grule-rule-engine Authors
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package ast
 import (
 	"bytes"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast/unique"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
+	"github.com/schleppy/grule-rule-engine/ast/unique"
+	"github.com/schleppy/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/pkg"
 )
 
 // NewThenExpression create new instance of ThenExpression

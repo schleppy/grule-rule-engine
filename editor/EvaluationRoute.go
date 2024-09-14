@@ -7,12 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/hyperjumptech/grule-rule-engine/ast"
-	"github.com/hyperjumptech/grule-rule-engine/builder"
-	"github.com/hyperjumptech/grule-rule-engine/engine"
-	"github.com/hyperjumptech/grule-rule-engine/logger"
-	"github.com/hyperjumptech/grule-rule-engine/pkg"
-	mux "github.com/hyperjumptech/hyper-mux"
+	"github.com/schleppy/grule-rule-engine/ast"
+	"github.com/schleppy/grule-rule-engine/builder"
+	"github.com/schleppy/grule-rule-engine/engine"
+	"github.com/schleppy/grule-rule-engine/logger"
+	"github.com/schleppy/grule-rule-engine/pkg"
+	mux "github.com/schleppy/hyper-mux"
 )
 
 type JSONData struct {
