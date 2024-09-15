@@ -188,12 +188,17 @@ func (e *RuleEntry) Evaluate(ctx context.Context, dataContext IDataContext, memo
 	val, err := e.WhenScope.Evaluate(dataContext, memory)
 	if err != nil {
 		e.logger.Errorf("Error while evaluating rule %s, got %v", e.RuleName, err)
-
-		return false, fmt.Errorf("evaluating expression in rule '%s' the when raised an error. got %v", dataContext.GetRuleEntry().RuleName, err)
+		var name string
+		if re := dataContext.GetRuleEntry(); re != nil {
+			name = re.RuleName
+		} else {
+			name = e.RuleName
+		}
+		return false, fmt.Errorf("evaluating expression in rule '%s' the 'when' clause raised an error. got %w", name, err)
 	}
 	if val.Kind() != reflect.Bool {
 
-		return false, fmt.Errorf("evaluating expression in rule '%s', the when is not a boolean expression : %s", dataContext.GetRuleEntry().RuleName, e.WhenScope.Expression.GetGrlText())
+		return false, fmt.Errorf("evaluating expression in rule '%s', the 'when' clause is not a boolean expression : %s", dataContext.GetRuleEntry().RuleName, e.WhenScope.Expression.GetGrlText())
 	}
 
 	return val.Bool(), nil
